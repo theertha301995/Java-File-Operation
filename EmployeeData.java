@@ -40,27 +40,39 @@ public class EmployeeData {
 
 	public static void main(String[] args) {
 		ExecutorService executorService = Executors.newFixedThreadPool(10);
-		Future<Employee[]> future = executorService.submit(new Callable<Employee[]>() {
-            public Employee[] call() throws Exception {
-                Employee[] employees = EmployeeData.employeeDetails();
-                EmployeeData.ageSort(employees);
-                EmployeeData.salarySort(employees);
-                return employees;
-            }
-        });
-		try
-		{
-			Employee[] AgeSorted = future.get();
-			Employee[] SalarySorted=future.get();
-			printEmployee p1= new printEmployee();
-			p1.display(AgeSorted);
-			System.out.println("---------------------");
-			p1.display(SalarySorted);
-		}
-		catch(InterruptedException |ExecutionException e)
-		{
-			e.printStackTrace();
-		}
-	}
+		Future<Employee[]> ageSortedFuture = executorService.submit(new Callable<Employee[]>() {
+	        public Employee[] call() throws Exception {
+	            Employee[] employees = EmployeeData.employeeDetails();
+	            EmployeeData.ageSort(employees);
+	            return employees;
+	        }
+	    });
 
+	    Future<Employee[]> salarySortedFuture = executorService.submit(new Callable<Employee[]>() {
+	        public Employee[] call() throws Exception {
+	            Employee[] employees = EmployeeData.employeeDetails();
+	            EmployeeData.salarySort(employees);
+	            return employees;
+	        }
+	    });
+
+	    try {
+	        Employee[] ageSorted = ageSortedFuture.get();
+	        Employee[] salarySorted = salarySortedFuture.get();
+
+	        printEmployee printer = new printEmployee();
+
+	        System.out.println("Age Sorted:");
+	        printer.display(ageSorted);
+
+	        System.out.println("---------------------");
+
+	        System.out.println("Salary Sorted:");
+	        printer.display(salarySorted);
+	    } catch (InterruptedException | ExecutionException e) {
+	        e.printStackTrace();
+	    }
+
+	    executorService.shutdown();
+	}
 }
